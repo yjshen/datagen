@@ -4,6 +4,8 @@ Multithreaded data generator for testing.
 
 ## build
 
+Build an include-all jar: `target/datagen-1.0-SNAPSHOT.jar`
+
 ```bash
 mvn clean package
 ```
