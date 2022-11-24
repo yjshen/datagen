@@ -22,12 +22,18 @@ public class App {
 
     // batch insert
     private void insertBatch(String table, int start, int end, String config) throws SQLException {
+        int step = 1024;
         try (Connection conn = DataSource.getInstance(config).getConnection();
              Statement stmt = conn.createStatement()) {
-            for (int i = start; i < end; i++) {
-                stmt.addBatch("INSERT INTO " + table + " VALUES (" + i + ", 'John Doe " + i + "', " + 3 + ", 'Temp')");
+            conn.setAutoCommit(false);
+            for (int i = start; i < end; i += step) {
+                for (int j = i; j < i + step; j++) {
+                    stmt.addBatch("INSERT INTO " + table + " VALUES(" + j + ", 'name" + j + "', 1, 'extra')");
+                }
+                stmt.executeBatch();
+                conn.commit();
+                System.out.println("Thread " + Thread.currentThread().getId() + " insert " + i + " to " + (i + step));
             }
-            stmt.executeBatch();
         } catch (SQLException e) {
             throw e;
         }
@@ -79,7 +85,7 @@ public class App {
 
             threads[i] = new Thread(() -> {
                 try {
-                    insert(table, startId, endId, config);
+                    insertBatch(table, startId, endId, config);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
