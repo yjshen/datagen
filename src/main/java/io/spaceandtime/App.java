@@ -13,7 +13,7 @@ public class App {
             stmt.executeUpdate("DROP TABLE IF EXISTS " + table);
             stmt.executeUpdate(
                     "CREATE TABLE " + table + "(id BIGINT, name VARCHAR, city_id BIGINT, extra VARCHAR, " +
-                            "PRIMARY KEY (id, city_id)) WITH \"template=deltastore\""
+                            "PRIMARY KEY (id)) WITH \"template=deltastore,immutable=true\""
             );
         } catch (SQLException e) {
             throw e;
@@ -51,6 +51,8 @@ public class App {
                         stmt.executeUpdate(sql);
                         break;
                     } catch (SQLException e) {
+                        System.err.println("Thread " + threadName + " insert failed, retry " + retry + " times");
+                        e.printStackTrace();
                         retry++;
                         if (retry == 3) {
                             throw e;
